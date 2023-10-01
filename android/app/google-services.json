@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "338991430020",
+    "firebase_url": "https://still-emissary-318811-default-rtdb.firebaseio.com",
+    "project_id": "still-emissary-318811",
+    "storage_bucket": "still-emissary-318811.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338991430020:android:8f19b30f3b5051859e05d1",
+        "android_client_info": {
+          "package_name": "com.apartmint.squarest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "338991430020-m93te192f5v9hpfs5r094j0t42rufg3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apartmint.squarest",
+            "certificate_hash": "1b70959626a25f51fa87c6ffbfef718c6ff878e5"
+          }
+        },
+        {
+          "client_id": "338991430020-n0hn32avpgfdq0hcb9f1rjekqv2k2i3j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apartmint.squarest",
+            "certificate_hash": "256c4ec86dc93261a5b7a60d45beaef385084159"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClkdNoavL2T3sw5TfHV4vPgYHrhuHwfdI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

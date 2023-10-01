@@ -1,0 +1,92 @@
+name: Deploy to Play Store - Alpha
+
+on:
+  push:
+    tags:
+      - '*v*'
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # 1 Set up Flutter.
+      - name: Latest Flutter Stable
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.7.3'
+      - run: flutter doctor -v
+
+      #2
+      - uses: olegtarasov/get-tag@v2.1 # that generate $GIT_TAG_NAME env
+        id: tagName
+
+      - name: Replace YAML version with tag version
+        run: |
+          sed -i 's/99.99.99+99/'$GIT_TAG_NAME'/g' pubspec.yaml|
+          echo "Tag used version:"$GIT_TAG_NAME
+
+      # 3 Checkout code, get packages
+      - name: Checkout code from master branch of repo
+        uses: actions/checkout@v3
+      - run: flutter pub get
+
+      # 4 Keystore
+      - name: Configure Keystore
+        run: |
+          echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+          echo "storeFile=upload-keystore.jks" >> key.properties
+          echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
+          echo "storePassword=$KEYSTORE_STORE_PASSWORD" >> key.properties
+          echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
+        env:
+          PLAY_STORE_UPLOAD_KEY: ${{ secrets.PLAY_STORE_UPLOAD_KEY }}
+          KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+        working-directory: android
+
+
+      - name: Build appbundle
+        run: flutter build appbundle --release --obfuscate --split-debug-info="build/app/outputs/bundle/release"
+
+      # 6
+      - name: Save APPBUNDLE to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: APPBUNDLE
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+      # 7
+      - name: Save mapping.txt to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: mapping.txt
+          path: build/app/outputs/mapping/release/mapping.txt
+          if-no-files-found: error
+
+  deploy-playstore-alpha:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      # 1
+      - uses: actions/download-artifact@v3
+        with:
+          name: APPBUNDLE
+      - uses: actions/download-artifact@v3
+        with:
+          name: mapping.txt
+      # 2
+      - name: Publish to Play Store alpha test track
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{secrets.PLAY_STORE_CONFIG_JSON}}
+          packageName: com.apartmint.squarest
+          releaseFiles: app-release.aab
+          track: Alpha-1
+          status: completed
+          mappingFile: mapping.txt
